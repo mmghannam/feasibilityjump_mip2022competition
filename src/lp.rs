@@ -7,7 +7,7 @@ use log::{info, warn};
 pub fn repair_continuous_and_save(
     mps_file: &Path,
     original_mps_file: &Path,
-    output: &mut impl FnMut(f32, &grb::Model),
+    output_file: &Path,
     presolved_output_path: &Path,
     presolved_solution_path: &Path,
     var_info: &[mpsparser::Variable],
@@ -46,11 +46,11 @@ pub fn repair_continuous_and_save(
             if lp_objective < *best_objective {
                 *best_objective = lp_objective;
                 info!(
-                    "Writing objective {} from original mps solution",
+                    "Writing objective {} from original mps solution {}",
                     lp_objective,
+                    output_file.to_string_lossy()
                 );
-                // model.write(&output_file.to_string_lossy()).unwrap();
-                output(lp_objective as f32, &model);
+                model.write(&output_file.to_string_lossy()).unwrap();
             }
         } else {
             // try to insert it into the original model file by variable name just in case
@@ -63,7 +63,7 @@ pub fn repair_continuous_and_save(
                     env,
                     solution,
                     var_info,
-                    output,
+                    output_file,
                     *best_objective,
                 );
                 if let Ok(original_objective) = orig_save {
@@ -82,15 +82,15 @@ pub fn repair_continuous_and_save(
             if !saved_through_original_mps && lp_objective < *best_objective {
                 *best_objective = lp_objective;
                 info!("Copying presolved model to the input mps directory.");
-                // std::fs::copy(mps_file, presolved_output_path).unwrap();
+                std::fs::copy(mps_file, presolved_output_path).unwrap();
                 info!(
-                    "Writing objective {} presolved mps solution",
+                    "Writing objective {} presolved mps solution {}",
                     lp_objective,
+                    presolved_solution_path.to_string_lossy()
                 );
-                // model
-                //     .write(&presolved_solution_path.to_string_lossy())
-                //     .unwrap();
-                output(lp_objective as f32, &model);
+                model
+                    .write(&presolved_solution_path.to_string_lossy())
+                    .unwrap();
             }
         }
     } else {
@@ -104,7 +104,7 @@ fn try_saving_from_original_model(
     env: grb::Env,
     solution: &[f64],
     var_info: &[mpsparser::Variable],
-    output: &mut impl FnMut(f32, &grb::Model),
+    output_file: &Path,
     best_objective: f64,
 ) -> Result<Option<f64>, grb::Error> {
     use grb::prelude::*;
@@ -157,12 +157,11 @@ fn try_saving_from_original_model(
         let objective = original_model.get_attr(attr::ObjVal)?;
         if objective < best_objective {
             info!(
-                "Writing objective {} original mps solution",
+                "Writing objective {} original mps solution {}",
                 objective,
-                // output_file.to_string_lossy()
+                output_file.to_string_lossy()
             );
-            // original_model.write(&output_file.to_string_lossy())?;
-            output(objective as f32, &original_model);
+            original_model.write(&output_file.to_string_lossy())?;
             Ok(Some(objective))
         } else {
             info!("Solution was worse than the previous best.");
