@@ -66,23 +66,28 @@ fn calculate_objective(mps: &MPSInstance, solution: &[f64]) -> f64 {
 }
 
 #[cfg(not(feature = "gurobi"))]
-fn save_solution(output_file: &str, mps: &MPSInstance, solution: &[f64], objective: f64) -> std::io::Result<()> {
+fn save_solution(
+    output_file: &str,
+    mps: &MPSInstance,
+    solution: &[f64],
+    objective: f64,
+) -> std::io::Result<()> {
     use std::io::Write;
-    
+
     let mut file = std::fs::File::create(output_file)?;
-    
+
     // Write objective value
     writeln!(file, "# Objective value: {}", objective)?;
     writeln!(file, "# Feasibility Jump Solution")?;
     writeln!(file)?;
-    
+
     // Write variable assignments
     for (var_idx, value) in solution.iter().enumerate() {
         if var_idx < mps.variables.len() {
             writeln!(file, "{} {}", mps.variables[var_idx].name, value)?;
         }
     }
-    
+
     Ok(())
 }
 
@@ -290,7 +295,7 @@ fn main() {
 
             let sol_tx = sol_tx.clone();
             let mps = &mps; // All threads use the original MPS
-            
+
             s.spawn(move |_| {
                 let objective_coeffs = mps
                     .objective()
@@ -301,7 +306,7 @@ fn main() {
 
                 let mut solver =
                     lsmip::solver::Solver::with_seed(thread_idx as usize, seed, decay_factor);
-                
+
                 // Add variables
                 for (var_idx, var) in mps.variables.iter().enumerate() {
                     let lb = var.lb.map(Number::as_f64).unwrap_or(0.) as f32;
@@ -346,9 +351,9 @@ fn main() {
         // Process solutions from all threads
         for solution in sol_rx.into_iter() {
             let objective = calculate_objective(&mps, &solution);
-            
+
             println!("Thread found solution with objective: {}", objective);
-            
+
             if objective < best_objective {
                 best_objective = objective;
                 best_solution = Some(solution);

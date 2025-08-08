@@ -93,7 +93,7 @@ const RANDOM_VAR: f32 = 0.001;
 const RANDOM_CELL: f32 = 0.01;
 const MAX_GOOD_CHOICES_TO_CHECK: usize = 15;
 
-const USE_RECOMPUTE_JUMP :bool = true;
+const USE_RECOMPUTE_JUMP: bool = true;
 
 // const CONSTRAINT_WEIGHT_INCREASE: f32 = 1.0;
 // const OBJECTIVE_WEIGHT_INCREASE: f32 = 1.0;
@@ -194,7 +194,6 @@ impl Solver {
     }
 
     pub fn jump_value(&self, var: usize) -> Option<f32> {
-
         if self.vars[var].jump_value.is_nan() {
             return None;
         }
@@ -1238,25 +1237,26 @@ impl Solver {
             self.reset_var_cost(var_idx);
 
             [Direction::Up, Direction::Down, Direction::Jump]
-            .iter()
-            .copied()
-            .map(|dir| Choice { dir, ..choice })
-            .filter(|c| match c.dir {
-                Direction::Up => self.step_up(c.var as usize).is_some(),
-                Direction::Down => self.step_down(c.var as usize).is_some(),
-                Direction::Jump => self.jump_value(c.var as usize).is_some(),
-            })
-            .max_by_key(|v| {
-                let score = match v.dir {
-                    Direction::Up => self.vars[v.var as usize].up_score,
-                    Direction::Down => self.vars[v.var as usize].down_score,
-                    Direction::Jump => self.vars[v.var as usize].jump_score,
-                };
-                (
-                    OrderedFloat(score),
-                    Reverse(self.vars[v.var as usize].time_stamp),
-                )
-            }).unwrap()
+                .iter()
+                .copied()
+                .map(|dir| Choice { dir, ..choice })
+                .filter(|c| match c.dir {
+                    Direction::Up => self.step_up(c.var as usize).is_some(),
+                    Direction::Down => self.step_down(c.var as usize).is_some(),
+                    Direction::Jump => self.jump_value(c.var as usize).is_some(),
+                })
+                .max_by_key(|v| {
+                    let score = match v.dir {
+                        Direction::Up => self.vars[v.var as usize].up_score,
+                        Direction::Down => self.vars[v.var as usize].down_score,
+                        Direction::Jump => self.vars[v.var as usize].jump_score,
+                    };
+                    (
+                        OrderedFloat(score),
+                        Reverse(self.vars[v.var as usize].time_stamp),
+                    )
+                })
+                .unwrap()
         };
 
         let dir = [Direction::Up, Direction::Down, Direction::Jump]

@@ -6,7 +6,6 @@ use log::{info, warn};
 
 #[cfg(feature = "gurobi")]
 #[allow(clippy::too_many_arguments)] // In a hurry :)
-
 #[cfg(feature = "gurobi")]
 pub fn repair_continuous_and_save(
     mps_file: &Path,
