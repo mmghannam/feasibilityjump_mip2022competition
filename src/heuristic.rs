@@ -15,6 +15,8 @@ pub struct HeuristicConfig {
     pub weight_decay: f64,
     /// Whether to relax continuous variables (default: true)
     pub relax_continuous: bool,
+    /// Iteration limit
+    pub iteration_limit: Option<usize>,
 }
 
 impl Default for HeuristicConfig {
@@ -25,6 +27,7 @@ impl Default for HeuristicConfig {
             seed: None,
             weight_decay: 1.0,
             relax_continuous: true,
+            iteration_limit: None, // No limit by default
         }
     }
 }
@@ -204,7 +207,7 @@ impl FeasibilityJumpHeuristic {
                 + thread_id as u64
         });
 
-        let mut solver = Solver::with_seed(thread_id, seed as u8, config.weight_decay);
+        let mut solver = Solver::with_seed(thread_id, seed as u8, config.weight_decay, config.iteration_limit.unwrap_or(usize::MAX));
 
         // Add variables to solver
         for var in variables {

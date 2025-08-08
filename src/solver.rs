@@ -34,6 +34,7 @@ pub struct Solver {
     weight_update_increment: f64,
 
     solver_id: usize,
+    iteration_limit: usize,
 }
 
 #[derive(PartialEq, Eq, PartialOrd, Ord, Debug, Clone, Copy)]
@@ -102,7 +103,7 @@ const VIOLATION_TOLERANCE: f32 = 1.0e-5;
 const EQ_TOLERANCE: f32 = 1.0e-5;
 
 impl Solver {
-    pub fn new(solver_id: usize, weight_update_decay: f64) -> Solver {
+    pub fn new(solver_id: usize, weight_update_decay: f64, iteration_limit: usize) -> Solver {
         Solver {
             vars: Vec::new(),
             constraints: Vec::new(),
@@ -124,11 +125,12 @@ impl Solver {
             weight_update_decay,
             weight_update_increment: 1.0,
             solver_id,
+            iteration_limit,
         }
     }
 
-    pub fn with_seed(solver_id: usize, seed: u8, weight_update_decay: f64) -> Solver {
-        let mut s = Self::new(solver_id, weight_update_decay);
+    pub fn with_seed(solver_id: usize, seed: u8, weight_update_decay: f64, iteration_limit: usize) -> Solver {
+        let mut s = Self::new(solver_id, weight_update_decay, iteration_limit);
         s.rng = rand_xoshiro::SplitMix64::from_seed([seed, 0, 0, 0, 0, 0, 0, 0]);
         s
     }
@@ -310,7 +312,7 @@ impl Solver {
         self.init(self.vars.iter().map(|v| v.default_value).collect());
 
         // let mut prev_choice: Option<Choice> = None;
-        for step in 0.. {
+        for step in 0..self.iteration_limit {
             // self.time as f64 / 1_000_000.0 / start.elapsed().as_secs_f64() == 35
 
             let time_since_last_improvement =
@@ -1483,6 +1485,6 @@ impl Solver {
 
 impl Default for Solver {
     fn default() -> Self {
-        Self::new(0, 1.0)
+        Self::new(0, 1.0, usize::MAX)
     }
 }

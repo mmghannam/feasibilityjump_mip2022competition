@@ -305,7 +305,7 @@ fn main() {
                     .collect::<HashMap<usize, f32>>();
 
                 let mut solver =
-                    lsmip::solver::Solver::with_seed(thread_idx as usize, seed, decay_factor);
+                    lsmip::solver::Solver::with_seed(thread_idx as usize, seed, decay_factor, usize::MAX);
 
                 // Add variables
                 for (var_idx, var) in mps.variables.iter().enumerate() {
