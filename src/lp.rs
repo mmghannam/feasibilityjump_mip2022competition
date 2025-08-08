@@ -1,9 +1,13 @@
+#[cfg(feature = "gurobi")]
 use std::path::Path;
 
+#[cfg(feature = "gurobi")]
 use log::{info, warn};
 
+#[cfg(feature = "gurobi")]
 #[allow(clippy::too_many_arguments)] // In a hurry :)
 
+#[cfg(feature = "gurobi")]
 pub fn repair_continuous_and_save(
     mps_file: &Path,
     original_mps_file: &Path,
@@ -98,6 +102,7 @@ pub fn repair_continuous_and_save(
     }
 }
 
+#[cfg(feature = "gurobi")]
 fn try_saving_from_original_model(
     _possibly_presolved_model: &grb::Model,
     original_mps_file: &Path,
