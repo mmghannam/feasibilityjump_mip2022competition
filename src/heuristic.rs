@@ -427,6 +427,11 @@ impl HeuristicBuilder {
         self
     }
 
+    pub fn iteration_limit(mut self, limit: Option<usize>) -> Self {
+        self.config.iteration_limit = limit;
+        self
+    }
+
     pub fn build(self) -> FeasibilityJumpHeuristic {
         FeasibilityJumpHeuristic::with_config(self.config)
     }
